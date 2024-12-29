@@ -25,6 +25,7 @@ runs:
       run: |
         unzip "${{ github.workspace }}/${{ runner.os }}.zip" -d "${{ github.workspace }}/nvgtgameengine"
         echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
+        chmod +x "${{ github.workspace }}/nvgtgameengine"
     - name: Checkout NVGT version
       shell: bash
       run: |
