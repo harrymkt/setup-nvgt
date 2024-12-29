@@ -17,14 +17,13 @@ runs:
       with:
         latest: ${{ inputs.latest }}
         fileName: "${{ runner.os }}.zip"
-        out-file-path: nvgt.zip
         tag: ${{ inputs.tag }}
         repository: harrymkt/nvgtreleases
 
     - name: Extract NVGT
       shell: bash
       run: |
-        unzip "${{ github.workspace }}/nvgt.zip" -d "${{ github.workspace }}/nvgtgameengine"
+        unzip "${{ github.workspace }}/${{ runner.os }}.zip" -d "${{ github.workspace }}/nvgtgameengine"
         echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
     - name: Checkout NVGT version
       shell: bash
