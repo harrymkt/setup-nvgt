@@ -1,0 +1,32 @@
+name: Setup NVGT
+description: Sets up the NVGT scripting language.
+inputs:
+  latest:
+    description: Set if it is latest to use
+    required: false
+    default: true
+  version:
+    description: The NVGT tagged version to install
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Download and install NVGT
+      uses: robinraju/release-downloader@v1
+      with:
+        latest: ${{ inputs.latest }}
+        fileName: "${{ runner.os }}.zip"
+        out-file-path: nvgt.zip
+        tag: ${{ inputs.tag }}
+        repository: ${{ github.action_repository }}
+
+    - name: Extract NVGT
+      shell: bash
+      run: |
+        unzip nvgt.zip -d "${{ github.workspace }}/nvgtgameengine"
+        echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
+    - name: Checkout NVGT version
+      shell: bash
+      run: |
+        nvgt --v
