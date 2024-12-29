@@ -19,7 +19,7 @@ runs:
         fileName: "${{ runner.os }}.zip"
         out-file-path: nvgt.zip
         tag: ${{ inputs.tag }}
-        repository: ${{ github.action_repository }}
+        repository: harrymkt/nvgtreleases
 
     - name: Extract NVGT
       shell: bash
