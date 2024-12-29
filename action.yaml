@@ -24,7 +24,7 @@ runs:
     - name: Extract NVGT
       shell: bash
       run: |
-        unzip nvgt.zip -d "${{ github.workspace }}/nvgtgameengine"
+        unzip "${{ github.workspace }}/nvgt.zip" -d "${{ github.workspace }}/nvgtgameengine"
         echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
     - name: Checkout NVGT version
       shell: bash
