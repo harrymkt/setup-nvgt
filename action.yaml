@@ -6,7 +6,7 @@ inputs:
     required: false
     default: true
   version:
-    description: The NVGT tagged version to install
+    description: The NVGT tagged version to install if not latest
     required: false
     default: ""
 runs:
@@ -25,7 +25,8 @@ runs:
       run: |
         unzip "${{ github.workspace }}/${{ runner.os }}.zip" -d "${{ github.workspace }}/nvgtgameengine"
         echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
-        chmod +x "${{ github.workspace }}/nvgtgameengine"
+        cd "${{ github.workspace }}/nvgtgameengine"
+        chmod +x nvgt
     - name: Checkout NVGT version
       shell: bash
       run: |
