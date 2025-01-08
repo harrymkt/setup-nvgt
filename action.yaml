@@ -9,16 +9,29 @@ inputs:
     description: The NVGT tagged version to install if not latest
     required: false
     default: ""
+  official:
+    description: Official release
+    required: false
+    default: true
 runs:
   using: composite
   steps:
-    - name: Download and install NVGT
+    - name: Set Options
+      id: options
+      shell: bash
+      run: |
+        if [[ "${{ inputs.official }}" == "true" ]]; then
+          echo "repo=nvgtreleases" >> $GITHUB_OUTPUT
+        else
+          echo "repo=nvgtreleases_u" >> $GITHUB_OUTPUT
+        fi
+    - name: Download
       uses: robinraju/release-downloader@v1
       with:
         latest: ${{ inputs.latest }}
         fileName: "${{ runner.os }}.zip"
         tag: ${{ inputs.tag }}
-        repository: harrymkt/nvgtreleases
+        repository: harrymkt/${{ steps.options.outputs.repo }}
 
     - name: Extract NVGT
       shell: bash
