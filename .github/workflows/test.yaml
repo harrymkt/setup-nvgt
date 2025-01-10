@@ -1,0 +1,14 @@
+name: Test action
+on: [push, workflow_dispatch]
+jobs:
+  test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup NVGT
+        id: engine
+        uses: harrymkt/setup-nvgt@main
+      - name: Checkout NVGT Outputs
+        shell: bash
+        run: |
+          echo "Path to NVGT is ${{ steps.engine.outputs.path }}"

@@ -9,10 +9,10 @@ inputs:
     description: The NVGT tagged version to install if not latest
     required: false
     default: ""
-  official:
-    description: Official release
-    required: false
-    default: true
+outputs:
+  path:
+    description: Path to the NVGT installation directory
+    value: "${{ steps.nvgt.outputs.path }}"
 runs:
   using: composite
   steps:
@@ -20,11 +20,7 @@ runs:
       id: options
       shell: bash
       run: |
-        if [[ "${{ inputs.official }}" == "true" ]]; then
-          echo "repo=nvgtreleases" >> $GITHUB_OUTPUT
-        else
-          echo "repo=nvgtreleases_u" >> $GITHUB_OUTPUT
-        fi
+        echo "repo=nvgtreleases" >> $GITHUB_OUTPUT
     - name: Download
       uses: robinraju/release-downloader@v1
       with:
@@ -40,7 +36,9 @@ runs:
         echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
         cd "${{ github.workspace }}/nvgtgameengine"
         chmod +x nvgt
-    - name: Checkout NVGT version
+    - name: Checkout NVGT
+      id: nvgt
       shell: bash
       run: |
         nvgt --v
+        echo "path=${{ github.workspace }}/nvgtgameengine" >> $GITHUB_OUTPUT

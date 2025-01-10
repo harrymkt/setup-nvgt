@@ -1,6 +1,6 @@
 # Setup NVGT Action
 This action is useful if you want to integrate [NVGT](https://nvgt.gg) scripting language into your GitHub action (GA) workflow.
-Currently, this fetches releases from the **nvgtreleases** repository, but it may be changed in the future should the official developer provide its own artifacts. <!--Also, since NVGT official release is slow, we have the **nvgtreleases_u** repository for unofficial releases.-->
+Currently, this fetches releases from the **nvgtreleases** repository, but it may be changed in the future should the official developer provide its own artifacts.
 
 ## Supported OS
 The action supports the following operating systems:
@@ -32,4 +32,7 @@ jobs:
 Provide variables with the `with` parameter:
 - `latest`(bool) optional: Should the action fetch the latest release as possible? Defaults to `true`.
 - `version`(string) optional: The NVGT version you want to install if not latest. Eg, `0.89.1_beta`. Defaults to none.
-<!--- `official`(bool) optional: Should the action use official release? Defaults to `true`.-->
+
+## Outputs
+You can retrieve these outputs with the `${{ steps.job_id.outputs.name }}` where `name` is the variable.
+- `path`(string): Path to the NVGT installation directory.
