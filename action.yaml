@@ -26,7 +26,7 @@ runs:
       with:
         latest: ${{ inputs.latest }}
         fileName: "${{ runner.os }}.zip"
-        tag: ${{ inputs.tag }}
+        tag: ${{ inputs.version }}
         repository: harrymkt/${{ steps.options.outputs.repo }}
 
     - name: Extract NVGT
@@ -36,6 +36,7 @@ runs:
         echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
         cd "${{ github.workspace }}/nvgtgameengine"
         chmod +x nvgt
+        echo "Setup complete"
     - name: Checkout NVGT
       id: nvgt
       shell: bash

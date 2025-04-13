@@ -20,6 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup NVGT
+        id: nvgt
         uses: harrymkt/setup-nvgt@main
         with:
           latest: true
@@ -34,5 +35,5 @@ Provide variables with the `with` parameter:
 - `version`(string) optional: The NVGT version you want to install if not latest. Eg, `0.89.1_beta`. Defaults to none.
 
 ## Outputs
-You can retrieve these outputs with the `${{ steps.job_id.outputs.name }}` where `name` is the variable.
+You can retrieve these outputs with the `${{ steps.job_id.outputs.name }}` where `name` is the variable and `job_id` is the ID of the job defined as the example.
 - `path`(string): Path to the NVGT installation directory.
