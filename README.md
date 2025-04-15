@@ -33,6 +33,7 @@ jobs:
 Provide variables with the `with` parameter:
 - `latest`(bool) optional: Should the action fetch the latest release as possible? Defaults to `true`.
 - `version`(string) optional: The NVGT version you want to install if not latest. Eg, `0.89.1_beta`. Defaults to none.
+- `official`(bool) optional: Should the action fetch the official release? Defaults to `true`.
 
 ## Outputs
 You can retrieve these outputs with the `${{ steps.job_id.outputs.name }}` where `name` is the variable and `job_id` is the ID of the job defined as the example.
