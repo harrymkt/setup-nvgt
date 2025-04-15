@@ -41,7 +41,7 @@ runs:
     - name: Extract NVGT
       shell: bash
       run: |
-        unzip "${{ github.workspace }}/${{ runner.os }}.zip" -d "${{ github.workspace }}/nvgtgameengine"
+        unzip "${{ github.workspace }}/${{ steps.options.outputs.filename }}.zip" -d "${{ github.workspace }}/nvgtgameengine"
         echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
         cd "${{ github.workspace }}/nvgtgameengine"
         chmod +x nvgt
