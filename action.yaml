@@ -26,9 +26,9 @@ runs:
       run: |
         echo "repo=nvgtreleases" >> $GITHUB_OUTPUT
         if [ "${{ inputs.official }}" = "true" ]; then
-          echo "filename=${{ os.runner }}" >> $GITHUB_OUTPUT
+          echo "filename=${{ runner.os }}" >> $GITHUB_OUTPUT
         else
-          echo "filename=u_${{ os.runner }}" >> $GITHUB_OUTPUT
+          echo "filename=u_${{ runner.os }}" >> $GITHUB_OUTPUT
         fi
     - name: Download
       uses: robinraju/release-downloader@v1
