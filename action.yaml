@@ -9,10 +9,6 @@ inputs:
     description: The NVGT tagged version to install if not latest
     required: false
     default: ""
-  official:
-    description: "Should the action fetch official release?"
-    required: false
-    default: true
 outputs:
   path:
     description: Path to the NVGT installation directory
@@ -25,11 +21,7 @@ runs:
       shell: bash
       run: |
         echo "repo=nvgtreleases" >> $GITHUB_OUTPUT
-        if [ "${{ inputs.official }}" = "true" ]; then
-          echo "filename=${{ runner.os }}" >> $GITHUB_OUTPUT
-        else
-          echo "filename=u_${{ runner.os }}" >> $GITHUB_OUTPUT
-        fi
+        echo "filename=${{ runner.os }}" >> $GITHUB_OUTPUT
     - name: Download
       uses: robinraju/release-downloader@v1
       with:

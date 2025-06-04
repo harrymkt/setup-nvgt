@@ -4,11 +4,7 @@ Currently, this fetches releases from the **nvgtreleases** repository, but it ma
 
 ## Supported OS
 The action supports the following operating systems:
-- `ubuntu-latest`: Linux.
 - `windows-latest`: Windows.
-
-## Notes
-- On Linux, Android compiler is not supported.
 
 ## Usage
 ```yaml
@@ -16,7 +12,7 @@ name: Build NVGT
 on: push
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup NVGT
@@ -32,8 +28,7 @@ jobs:
 ## Inputs
 Provide variables with the `with` parameter:
 - `latest`(bool) optional: Should the action fetch the latest release as possible? Defaults to `true`.
-- `version`(string) optional: The NVGT version you want to install if not latest. Eg, `0.89.1_beta`. Defaults to none.
-- `official`(bool) optional: Should the action fetch the official release? Defaults to `true`.
+- `version`(string) optional: The NVGT version you want to install if not latest. Eg, `0.89.1_beta`. Defaults to none. Use `dev` to use latest unstable development
 
 ## Outputs
 You can retrieve these outputs with the `${{ steps.job_id.outputs.name }}` where `name` is the variable and `job_id` is the ID of the job defined as the example.
