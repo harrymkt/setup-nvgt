@@ -14,4 +14,4 @@ jobs:
       - name: Checkout NVGT Outputs
         shell: bash
         run: |
-          echo "Path to NVGT is ${{ steps.engine.outputs.path }}"
+          nvgt -V

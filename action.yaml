@@ -1,46 +1,97 @@
 name: Setup NVGT
-description: Sets up the NVGT scripting language.
+description: Downloads and installs NVGT for the current platform.
 inputs:
-  latest:
-    description: Set if it is latest to use
-    required: false
-    default: true
   version:
-    description: The NVGT tagged version to install if not latest
+    description: NVGT version to install (ignored if latest or dev is true)
     required: false
     default: ""
-outputs:
-  path:
-    description: Path to the NVGT installation directory
-    value: "${{ steps.nvgt.outputs.path }}"
+  latest:
+    description: Download the latest stable version
+    required: false
+    default: true
+  dev:
+    description: Download the latest development version
+    required: false
+    default: 'false'
+  add-to-path:
+    description: Add the install directory to PATH
+    required: false
+    default: 'true'
+
 runs:
   using: composite
   steps:
-    - name: Set Options
-      id: options
+    - name: Determine Download URL
+      id: setup
       shell: bash
       run: |
-        echo "repo=nvgtreleases" >> $GITHUB_OUTPUT
-        echo "filename=${{ runner.os }}" >> $GITHUB_OUTPUT
-    - name: Download
-      uses: robinraju/release-downloader@v1
-      with:
-        latest: ${{ inputs.latest }}
-        fileName: "${{ steps.options.outputs.filename }}.zip"
-        tag: ${{ inputs.version }}
-        repository: harrymkt/${{ steps.options.outputs.repo }}
+        # Determine platform suffix
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          PLATFORM="windows"
+          EXT="exe"
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          PLATFORM="mac"
+          EXT="dmg"
+        else
+          PLATFORM="linux"
+          EXT="tar.gz"
+        fi
 
-    - name: Extract NVGT
+        # Logic for URL selection
+        if [ "${{ inputs.latest }}" == "true" ]; then
+          URL="https://nvgt.zip/${PLATFORM}"
+        elif [ "${{ inputs.dev }}" == "true" ]; then
+          URL="https://nvgt.zip/dev/${PLATFORM}"
+        else
+          # Fallback to specific version
+          VERSION="${{ inputs.version }}"
+          URL="https://nvgt.dev/downloads/nvgt_${VERSION}.${EXT}"
+        fi
+
+        echo "url=$URL" >> $GITHUB_OUTPUT
+        echo "ext=$EXT" >> $GITHUB_OUTPUT
+
+    - name: Install NVGT (Windows)
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        $url = "${{ steps.setup.outputs.url }}"
+        $installer = "$env:TEMP\nvgt_install.exe"
+        Write-Host "Downloading: $url"
+        Invoke-WebRequest -Uri $url -OutFile $installer
+        Start-Process -FilePath $installer -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/DIR=C:\nvgt" -Wait
+        if ("${{ inputs.add-to-path }}" -eq "true") {
+          "C:\nvgt" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        }
+
+    - name: Install NVGT (macOS)
+      if: runner.os == 'macOS'
       shell: bash
       run: |
-        unzip "${{ github.workspace }}/${{ steps.options.outputs.filename }}.zip" -d "${{ github.workspace }}/nvgtgameengine"
-        echo "${{ github.workspace }}/nvgtgameengine" >> $GITHUB_PATH
-        cd "${{ github.workspace }}/nvgtgameengine"
-        chmod +x nvgt
-        echo "Setup complete"
-    - name: Checkout NVGT
-      id: nvgt
+        URL="${{ steps.setup.outputs.url }}"
+        DMG="$RUNNER_TEMP/nvgt.dmg"
+        MOUNT="/Volumes/NVGT"
+        echo "Downloading: $URL"
+        curl -fsSL "$URL" -o "$DMG"
+        hdiutil attach "$DMG" -mountpoint "$MOUNT"
+        [ -d /Applications/NVGT.app ] && sudo rm -rf /Applications/NVGT.app
+        sudo cp -R "$MOUNT/NVGT.app" /Applications/
+        hdiutil detach "$MOUNT"
+        if [ "${{ inputs.add-to-path }}" = "true" ]; then
+          echo "/Applications/NVGT.app/Contents/MacOS" >> "$GITHUB_PATH"
+        fi
+
+    - name: Install NVGT (Linux)
+      if: runner.os == 'Linux'
       shell: bash
       run: |
-        nvgt --v
-        echo "path=${{ github.workspace }}/nvgtgameengine" >> $GITHUB_OUTPUT
+        URL="${{ steps.setup.outputs.url }}"
+        ARCHIVE="$RUNNER_TEMP/nvgt.tar.gz"
+        INSTALL_DIR="/opt/nvgt"
+        echo "Downloading: $URL"
+        curl -fsSL "$URL" -o "$ARCHIVE"
+        sudo mkdir -p "$INSTALL_DIR"
+        sudo tar -xzf "$ARCHIVE" -C "$INSTALL_DIR"
+        if [ "${{ inputs.add-to-path }}" = "true" ]; then
+          echo "$INSTALL_DIR" >> "$GITHUB_PATH"
+        fi
