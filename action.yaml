@@ -38,9 +38,9 @@ runs:
         fi
 
         # Logic for URL selection
-        if [ "${{ inputs.latest }}" == "true" ]; then
+        if [ "${{ inputs.dev }}" == "true" ]; then
           URL="https://nvgt.zip/${PLATFORM}"
-        elif [ "${{ inputs.dev }}" == "true" ]; then
+        elif [ "${{ inputs.latest }}" == "true" ]; then
           URL="https://nvgt.zip/dev/${PLATFORM}"
         else
           # Fallback to specific version
