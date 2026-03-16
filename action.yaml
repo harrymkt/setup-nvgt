@@ -13,10 +13,6 @@ inputs:
     description: Download the latest development version
     required: false
     default: 'false'
-  components:
-    description: Comma-separated list of InnoSetup components to install (Windows only)
-    required: false
-    default: 'core,includes,plugins,stubs,associate,path'
   add-to-path:
     description: Add the install directory to PATH
     required: false
@@ -60,14 +56,10 @@ runs:
       shell: powershell
       run: |
         $url = "${{ steps.setup.outputs.url }}"
-        $components = "${{ inputs.components }}"
         $installer = "$env:TEMP\nvgt_install.exe"
         Write-Host "Downloading: $url"
         Invoke-WebRequest -Uri $url -OutFile $installer
-        
-        Write-Host "Installing components: $components"
-        Start-Process -FilePath $installer -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/DIR=C:\nvgt","/COMPONENTS=""$components""" -Wait
-        
+        Start-Process -FilePath $installer -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/DIR=C:\nvgt" -Wait
         if ("${{ inputs.add-to-path }}" -eq "true") {
           "C:\nvgt" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         }
