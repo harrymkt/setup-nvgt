@@ -3,9 +3,10 @@ This action is useful if you want to integrate [NVGT](https://nvgt.dev) scriptin
 
 ## Supported OS
 The action supports the following operating systems:
-- `windows-latest`: Windows.
+- `windows-latest`: Windows
+- `ubuntu-latest`: Linux
 
-Mac OS and Linux should be supported, but it is not tested.
+Mac OS should be supported, but it is not tested.
 
 ## Usage
 ```yaml
