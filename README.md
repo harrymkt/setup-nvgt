@@ -5,8 +5,7 @@ This action is useful if you want to integrate [NVGT](https://nvgt.dev) scriptin
 The action supports the following operating systems:
 - `windows-latest`: Windows
 - `ubuntu-latest`: Linux
-
-Mac OS should be supported, but it is not tested.
+- `macos-latest`: Mac OS
 
 ## Usage
 ```yaml
