@@ -17,6 +17,7 @@ jobs:
         shell: bash
         run: |
           nvgt -V
+          ls ${{ steps.engine.outputs.path }}
 
   test-Linux:
     name: Test on Linux
@@ -30,6 +31,7 @@ jobs:
         shell: bash
         run: |
           nvgt -V
+          ls ${{ steps.engine.outputs.path }}
 
   test-Mac-OS:
     name: Test on Mac OS
@@ -43,3 +45,4 @@ jobs:
         shell: bash
         run: |
           nvgt -V
+          ls ${{ steps.engine.outputs.path }}
