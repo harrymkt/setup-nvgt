@@ -63,7 +63,7 @@ runs:
         Write-Host "Installing..."
         Start-Process -FilePath $installer -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/DIR=C:\nvgt" -Wait
         Write-Host "Install finished"
-        "path=C:\nvgt" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        "path=C:/nvgt" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
         if ("${{ inputs.add-to-path }}" -eq "true") {
           "C:\nvgt" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           Write-Host "Path modified"
