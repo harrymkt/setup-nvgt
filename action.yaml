@@ -21,7 +21,7 @@ inputs:
 outputs:
   path:
     description: Path to the NVGT installation directory
-    value: "${{ steps.nvgt.outputs.path }}"
+    value: ${{ runner.os == "Windows" && steps.windows.outputs.path || runner.os == "Linux" && steps.linux.outputs.path || runner.os == "macOS" && steps.nvgt_macos.outputs.path }}
 
 runs:
   using: composite
@@ -29,35 +29,35 @@ runs:
     - id: setup
       shell: bash
       run: |
+        set -euo pipefail
         # Determine platform suffix
-        if [ "$RUNNER_OS" == "Windows" ]; then
+        if [ "$RUNNER_OS" = "Windows" ]; then
           PLATFORM="windows"
           EXT="exe"
-        elif [ "$RUNNER_OS" == "macOS" ]; then
+        elif [ "$RUNNER_OS" = "macOS" ]; then
           PLATFORM="mac"
           EXT="dmg"
         else
           PLATFORM="linux"
           EXT="tar.gz"
         fi
-        # Logic for URL selection
-        if [ "${{ inputs.dev }}" == "true" ]; then
+        # Logic for URL selection (inputs are expanded before the step runs)
+        if [ "${{ inputs.dev }}" = "true" ]; then
           URL="https://nvgt.zip/dev/${PLATFORM}"
-        elif [ "${{ inputs.latest }}" == "true" ]; then
+        elif [ "${{ inputs.latest }}" = "true" ]; then
           URL="https://nvgt.zip/${PLATFORM}"
         else
-          # Fallback to specific version
           VERSION="${{ inputs.version }}"
           URL="https://nvgt.dev/downloads/nvgt_${VERSION}.${EXT}"
         fi
-        echo "url=$URL" >> $GITHUB_OUTPUT
-        echo "ext=$EXT" >> $GITHUB_OUTPUT
-    - if: runner.os == "Windows"
-      id: nvgt
+        echo "url=$URL" >> "$GITHUB_OUTPUT"
+        echo "ext=$EXT" >> "$GITHUB_OUTPUT"
+    - if: ${{ runner.os == "Windows" }}
+      id: windows
       shell: powershell
       run: |
         $url = "${{ steps.setup.outputs.url }}"
-        $installer = "$env:TEMP\nvgt_install.exe"
+        $installer = Join-Path $env:TEMP 'nvgt_install.exe'
         Write-Host "Downloading: $url"
         Invoke-WebRequest -Uri $url -OutFile $installer
         Write-Host "Installing..."
@@ -68,10 +68,11 @@ runs:
           "C:\nvgt" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           Write-Host "Path modified"
         }
-    - if: runner.os == "Linux"
-      id: nvgt
+    - if: ${{ runner.os == "Linux" }}
+      id: linux
       shell: bash
       run: |
+        set -euo pipefail
         URL="${{ steps.setup.outputs.url }}"
         ARCHIVE="$RUNNER_TEMP/nvgt.tar.gz"
         INSTALL_DIR="/opt/nvgt"
@@ -81,13 +82,13 @@ runs:
         sudo mkdir -p "$INSTALL_DIR"
         sudo tar -xzf "$ARCHIVE" -C "$INSTALL_DIR"
         echo "Install finished"
-        echo "$INSTALL_DIR" >> "$GITHUB_OUTPUT"
+        echo "path=$INSTALL_DIR" >> "$GITHUB_OUTPUT"
         if [ "${{ inputs.add-to-path }}" = "true" ]; then
           echo "$INSTALL_DIR" >> "$GITHUB_PATH"
           echo "Path modified"
         fi
-    - if: runner.os == "macOS"
-      id: nvgt
+    - if: ${{ runner.os == "macOS" }}
+      id: macos
       shell: bash
       run: |
         set -euo pipefail
