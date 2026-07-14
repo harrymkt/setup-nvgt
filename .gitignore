@@ -1,0 +1,5 @@
+# Pre directory is used to add private ones, for test purpose before push, so they would not contain in commits.
+pre/**
+!pre/README.md
+
+node_modules

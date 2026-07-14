@@ -1,116 +1,24 @@
 name: Setup NVGT
 description: Download and install NVGT for the current platform.
+
 inputs:
   version:
-    description: NVGT version to install (ignored if latest or dev is true)
     required: false
     default: ""
   latest:
-    description: Download the latest stable version
     required: false
-    default: true
+    default: "true"
   dev:
-    description: Download the latest development version
     required: false
     default: "false"
   add-to-path:
-    description: Add the install directory to PATH
     required: false
     default: "true"
 
 outputs:
   path:
-    description: Path to the NVGT installation directory
-    value: ${{ steps.windows.outputs.path || steps.linux.outputs.path || steps.macos.outputs.path }}
+    description: Path to NVGT install
 
 runs:
-  using: composite
-  steps:
-    - id: setup
-      shell: bash
-      run: |
-        set -euo pipefail
-        # Determine platform suffix
-        if [ "$RUNNER_OS" = "Windows" ]; then
-          PLATFORM="windows"
-          EXT="exe"
-        elif [ "$RUNNER_OS" = "macOS" ]; then
-          PLATFORM="mac"
-          EXT="dmg"
-        else
-          PLATFORM="linux"
-          EXT="tar.gz"
-        fi
-        # Logic for URL selection (inputs are expanded before the step runs)
-        if [ "${{ inputs.dev }}" = "true" ]; then
-          URL="https://nvgt.zip/dev/${PLATFORM}"
-        elif [ "${{ inputs.latest }}" = "true" ]; then
-          URL="https://nvgt.zip/${PLATFORM}"
-        else
-          VERSION="${{ inputs.version }}"
-          URL="https://nvgt.dev/downloads/nvgt_${VERSION}.${EXT}"
-        fi
-        echo "url=$URL" >> "$GITHUB_OUTPUT"
-        echo "ext=$EXT" >> "$GITHUB_OUTPUT"
-    - if: runner.os == 'Windows'
-      id: windows
-      shell: powershell
-      run: |
-        $url = "${{ steps.setup.outputs.url }}"
-        $installer = Join-Path $env:TEMP 'nvgt_install.exe'
-        Write-Host "Downloading: $url"
-        Invoke-WebRequest -Uri $url -OutFile $installer
-        Write-Host "Installing..."
-        Start-Process -FilePath $installer -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/DIR=C:\nvgt" -Wait
-        Write-Host "Install finished"
-        "path=C:/nvgt" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-        if ("${{ inputs.add-to-path }}" -eq "true") {
-          "C:\nvgt" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          Write-Host "Path modified"
-        }
-    - if: runner.os == 'Linux'
-      id: linux
-      shell: bash
-      run: |
-        set -euo pipefail
-        URL="${{ steps.setup.outputs.url }}"
-        ARCHIVE="$RUNNER_TEMP/nvgt.tar.gz"
-        INSTALL_DIR="/opt/nvgt"
-        echo "Downloading: $URL"
-        curl -fsSL "$URL" -o "$ARCHIVE"
-        echo "Installing..."
-        sudo mkdir -p "$INSTALL_DIR"
-        sudo tar -xzf "$ARCHIVE" -C "$INSTALL_DIR"
-        echo "Install finished"
-        echo "path=$INSTALL_DIR" >> "$GITHUB_OUTPUT"
-        if [ "${{ inputs.add-to-path }}" = "true" ]; then
-          echo "$INSTALL_DIR" >> "$GITHUB_PATH"
-          echo "Path modified"
-        fi
-    - if: runner.os == 'macOS'
-      id: macos
-      shell: bash
-      run: |
-        set -euo pipefail
-        URL="${{ steps.setup.outputs.url }}"
-        DMG="$RUNNER_TEMP/nvgt.dmg"
-        MOUNT="$RUNNER_TEMP/NVGT_MOUNT"
-        APP_DIR="$HOME/Applications"
-        echo "Downloading: $URL"
-        curl -fsSL "$URL" -o "$DMG"
-        echo "Mounting DMG..."
-        mkdir -p "$MOUNT"
-        hdiutil attach "$DMG" -mountpoint "$MOUNT" -nobrowse -quiet
-        echo "Installing..."
-        mkdir -p "$APP_DIR"
-        rm -rf "$APP_DIR/NVGT.app"
-        cp -R "$MOUNT/NVGT.app" "$APP_DIR/"
-        echo "Unmounting..."
-        hdiutil detach "$MOUNT" -quiet
-        echo "Install finished"
-        pathval="$APP_DIR/NVGT.app/Contents/MacOS"
-        echo "path=$pathval" >> "$GITHUB_OUTPUT"
-        if [ "${{ inputs.add-to-path }}" = "true" ]; then
-          echo "$pathval" >> "$GITHUB_PATH"
-          echo "Path modified"
-        fi
+  using: node24
+  main: dist/index.js
