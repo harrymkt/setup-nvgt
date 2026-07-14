@@ -17,7 +17,7 @@ jobs:
         shell: bash
         run: |
           nvgt -V
-          ls ${{ steps.engine.outputs.path }}
+          ls "${{ steps.engine.outputs.path }}"
 
   test-Linux:
     name: Test on Linux
