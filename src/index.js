@@ -127,16 +127,13 @@ async function run() {
 		} else {
 			url = `https://nvgt.dev/downloads/nvgt_${version}.${EXT}`;
 		}
-		core.info(`Downloading: ${url}`);
+		core.info(`Downloading NVGT: ${url}`);
 		const downloadPath = await tc.downloadTool(url, path.join(process.env["RUNNER_TEMP"], `nvgtfile.${EXT}`));
 		let installPath;
-		// ------------------------
-		// WINDOWS
-		// ------------------------
 		if (platform === "win32") {
 			const dest = "C:\\nvgt";
 			await io.mkdirP(dest);
-			core.info("Installing on Windows...");
+			core.info("Installing NVGT on Windows...");
 			await exec.exec(downloadPath, [
 				"/VERYSILENT",
 				"/SUPPRESSMSGBOXES",
@@ -144,27 +141,19 @@ async function run() {
 				`/DIR=${dest}`,
 			]);
 			installPath = dest;
-		}
-		// ------------------------
-		// LINUX
-		// ------------------------
-		else if (platform === "linux") {
+		} else if (platform === "linux") {
 			const dest = "/opt/nvgt";
 			await io.mkdirP(dest);
-			core.info("Extracting on Linux (overwrite mode)...");
+			core.info("Extracting NVGT on Linux...");
 			await tc.extractTar(downloadPath, dest);
 			installPath = dest;
-		}
-		// ------------------------
-		// MACOS
-		// ------------------------
-		else if (platform === "darwin") {
+		} else if (platform === "darwin") {
 			const mount = path.join(os.tmpdir(), "nvgt_mount");
 			const appDir = path.join(process.env.HOME, "Applications");
 			const targetApp = path.join(appDir, "NVGT.app");
 			await io.mkdirP(mount);
 			await io.mkdirP(appDir);
-			core.info("Mounting DMG...");
+			core.info("Mounting NVGT DMG...");
 			try {
 				await exec.exec("hdiutil", [
 					"attach",
@@ -174,29 +163,26 @@ async function run() {
 					"-nobrowse",
 					"-quiet",
 				]);
-				core.info("Installing (overwrite app bundle)...");
-				// remove only the app bundle (safe overwrite)
+				core.info("Installing NVGT...");
+				// Remove only the app bundle (safe overwrite)
 				if (fs.existsSync(targetApp)) {
 					await io.rmRF(targetApp);
 				}
 				await exec.exec("cp", ["-R", `${mount}/NVGT.app`, appDir]);
 			} finally {
-				core.info("Unmounting DMG...");
+				core.info("Unmounting NVGT DMG...");
 				await exec.exec("hdiutil", ["detach", mount, "-quiet"]);
 			}
 			installPath = `${targetApp}/Contents/MacOS`;
 		}
-		// ------------------------
-		// OUTPUT
-		// ------------------------
 		core.setOutput("path", installPath);
 		if (addToPath) {
 			core.addPath(installPath);
-			core.info("Added to PATH");
+			core.info("Added NVGT to PATH");
 		}
-		core.info(`Installed at: ${installPath}`);
+		core.info(`NVGT has been installed at: ${installPath}`);
 		if (tools.length > 0) {
-			core.info("Installing tools");
+			core.info("Installing tools...");
 			for (const t of tools) {
 				await installTool(t, installPath);
 			}

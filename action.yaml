@@ -3,15 +3,15 @@ description: Download and install NVGT for the current platform.
 
 inputs:
   version:
-    description: The version to install. Ignored if latest or dev is true.
+    description: Version to install. Ignored if latest or dev is true.
     required: false
     default: ""
   latest:
-    description: Install latest version. Ignored if dev is true.
+    description: Install the latest version. Ignored if dev is true.
     required: false
     default: "true"
   dev:
-    description: Install the development bleeding edge version. Takes president over all else.
+    description: Install the bleeding edge development version. Takes president over all else.
     required: false
     default: "false"
   tools:
@@ -19,12 +19,13 @@ inputs:
     required: false
     default: ""
   add-to-path:
+    description: Add NVGT to path after installation.
     required: false
     default: "true"
 
 outputs:
   path:
-    description: Path to NVGT install
+    description: Path to the NVGT installed directory.
 
 runs:
   using: node24

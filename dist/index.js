@@ -34812,16 +34812,13 @@ async function run() {
 		} else {
 			url = `https://nvgt.dev/downloads/nvgt_${version}.${EXT}`;
 		}
-		info(`Downloading: ${url}`);
+		info(`Downloading NVGT: ${url}`);
 		const downloadPath = await downloadTool(url, external_path_namespaceObject.join(external_process_namespaceObject.env["RUNNER_TEMP"], `nvgtfile.${EXT}`));
 		let installPath;
-		// ------------------------
-		// WINDOWS
-		// ------------------------
 		if (platform === "win32") {
 			const dest = "C:\\nvgt";
 			await mkdirP(dest);
-			info("Installing on Windows...");
+			info("Installing NVGT on Windows...");
 			await exec_exec(downloadPath, [
 				"/VERYSILENT",
 				"/SUPPRESSMSGBOXES",
@@ -34829,27 +34826,19 @@ async function run() {
 				`/DIR=${dest}`,
 			]);
 			installPath = dest;
-		}
-		// ------------------------
-		// LINUX
-		// ------------------------
-		else if (platform === "linux") {
+		} else if (platform === "linux") {
 			const dest = "/opt/nvgt";
 			await mkdirP(dest);
-			info("Extracting on Linux (overwrite mode)...");
+			info("Extracting NVGT on Linux...");
 			await extractTar(downloadPath, dest);
 			installPath = dest;
-		}
-		// ------------------------
-		// MACOS
-		// ------------------------
-		else if (platform === "darwin") {
+		} else if (platform === "darwin") {
 			const mount = external_path_namespaceObject.join(external_os_namespaceObject.tmpdir(), "nvgt_mount");
 			const appDir = external_path_namespaceObject.join(external_process_namespaceObject.env.HOME, "Applications");
 			const targetApp = external_path_namespaceObject.join(appDir, "NVGT.app");
 			await mkdirP(mount);
 			await mkdirP(appDir);
-			info("Mounting DMG...");
+			info("Mounting NVGT DMG...");
 			try {
 				await exec_exec("hdiutil", [
 					"attach",
@@ -34859,29 +34848,26 @@ async function run() {
 					"-nobrowse",
 					"-quiet",
 				]);
-				info("Installing (overwrite app bundle)...");
-				// remove only the app bundle (safe overwrite)
+				info("Installing NVGT...");
+				// Remove only the app bundle (safe overwrite)
 				if (external_fs_namespaceObject.existsSync(targetApp)) {
 					await rmRF(targetApp);
 				}
 				await exec_exec("cp", ["-R", `${mount}/NVGT.app`, appDir]);
 			} finally {
-				info("Unmounting DMG...");
+				info("Unmounting NVGT DMG...");
 				await exec_exec("hdiutil", ["detach", mount, "-quiet"]);
 			}
 			installPath = `${targetApp}/Contents/MacOS`;
 		}
-		// ------------------------
-		// OUTPUT
-		// ------------------------
 		setOutput("path", installPath);
 		if (addToPath) {
 			addPath(installPath);
-			info("Added to PATH");
+			info("Added NVGT to PATH");
 		}
-		info(`Installed at: ${installPath}`);
+		info(`NVGT has been installed at: ${installPath}`);
 		if (tools.length > 0) {
-			info("Installing tools");
+			info("Installing tools...");
 			for (const t of tools) {
 				await installTool(t, installPath);
 			}

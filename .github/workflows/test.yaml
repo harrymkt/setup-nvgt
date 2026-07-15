@@ -2,6 +2,7 @@ name: Test Action
 on:
   push:
     branches: [main]
+    paths: ["dist/index.js"]
   workflow_dispatch:
 
 jobs:
