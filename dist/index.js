@@ -34702,6 +34702,7 @@ function getPlatformKey() {
 
 
 
+
 const tools = {
 	nvgtpm: {
 		windows: {
@@ -34774,12 +34775,12 @@ async function install(toolInput, installDir) {
 	}
 	const url = resolveUrl(platformInfo.url, tag);
 	const destination = external_path_namespaceObject.join(installDir, platformInfo.file);
-	core.info(`Installing ${name}@${tag}`);
+	info(`Installing ${name}@${tag}`);
 	await download(url, destination);
 	if (platform !== "windows") {
 		external_fs_namespaceObject.chmodSync(destination, 0o755);
 	}
-	core.info(`${name}@${tag} installed at ${destination}`);
+	info(`${name}@${tag} installed at ${destination}`);
 	return destination;
 }
 

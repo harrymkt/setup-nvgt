@@ -1,4 +1,5 @@
 import {getPlatformKey} from "./utils.js";
+import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
 import * as io from "@actions/io";
 import path from "path";
