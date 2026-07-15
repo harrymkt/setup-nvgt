@@ -37,7 +37,7 @@ async function downloadTool(url, destination) {
 	const tempFile = await tc.downloadTool(url);
 	await io.mkdirP(path.dirname(destination));
 	// Overwrite existing file
-	await fs.copyFile(tempFile, destination);
+	await exec.exec("cp", ["-R", tempFile, destination]);
 	return destination;
 }
 async function installTool(tool, installDir) {
