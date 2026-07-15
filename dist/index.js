@@ -34723,7 +34723,7 @@ async function src_downloadTool(url, destination) {
 	const tempFile = await downloadTool(url);
 	await mkdirP(external_path_namespaceObject.dirname(destination));
 	// Overwrite existing file
-	await external_fs_namespaceObject.copyFile(tempFile, destination);
+	await exec_exec("cp", ["-R", tempFile, destination]);
 	return destination;
 }
 async function installTool(tool, installDir) {
