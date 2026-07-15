@@ -32404,7 +32404,7 @@ const IS_WINDOWS = process.platform === 'win32';
  */
 function readlink(fsPath) {
     return io_util_awaiter(this, void 0, void 0, function* () {
-        const result = yield fs.promises.readlink(fsPath);
+        const result = yield external_fs_namespaceObject.promises.readlink(fsPath);
         // On Windows, restore Node 20 behavior: add trailing backslash to all results
         // since junctions on Windows are always directory links
         if (IS_WINDOWS && !result.endsWith('\\')) {
@@ -32580,19 +32580,19 @@ var io_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argum
 function io_cp(source_1, dest_1) {
     return io_awaiter(this, arguments, void 0, function* (source, dest, options = {}) {
         const { force, recursive, copySourceDirectory } = readCopyOptions(options);
-        const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
+        const destStat = (yield exists(dest)) ? yield stat(dest) : null;
         // Dest is an existing file, but not forcing
         if (destStat && destStat.isFile() && !force) {
             return;
         }
         // If dest is an existing directory, should copy inside.
         const newDest = destStat && destStat.isDirectory() && copySourceDirectory
-            ? path.join(dest, path.basename(source))
+            ? external_path_namespaceObject.join(dest, external_path_namespaceObject.basename(source))
             : dest;
-        if (!(yield ioUtil.exists(source))) {
+        if (!(yield exists(source))) {
             throw new Error(`no such file or directory: ${source}`);
         }
-        const sourceStat = yield ioUtil.stat(source);
+        const sourceStat = yield stat(source);
         if (sourceStat.isDirectory()) {
             if (!recursive) {
                 throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
@@ -32602,7 +32602,7 @@ function io_cp(source_1, dest_1) {
             }
         }
         else {
-            if (path.relative(source, newDest) === '') {
+            if (external_path_namespaceObject.relative(source, newDest) === '') {
                 // a file cannot be copied to itself
                 throw new Error(`'${newDest}' and '${source}' are the same file`);
             }
@@ -32784,11 +32784,11 @@ function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
             return;
         currentDepth++;
         yield mkdirP(destDir);
-        const files = yield ioUtil.readdir(sourceDir);
+        const files = yield readdir(sourceDir);
         for (const fileName of files) {
             const srcFile = `${sourceDir}/${fileName}`;
             const destFile = `${destDir}/${fileName}`;
-            const srcFileStat = yield ioUtil.lstat(srcFile);
+            const srcFileStat = yield lstat(srcFile);
             if (srcFileStat.isDirectory()) {
                 // Recurse
                 yield cpDirRecursive(srcFile, destFile, currentDepth, force);
@@ -32798,32 +32798,32 @@ function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
             }
         }
         // Change the mode for the newly created directory
-        yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
+        yield chmod(destDir, (yield stat(sourceDir)).mode);
     });
 }
 // Buffered file copy
 function io_copyFile(srcFile, destFile, force) {
     return io_awaiter(this, void 0, void 0, function* () {
-        if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
+        if ((yield lstat(srcFile)).isSymbolicLink()) {
             // unlink/re-link it
             try {
-                yield ioUtil.lstat(destFile);
-                yield ioUtil.unlink(destFile);
+                yield lstat(destFile);
+                yield unlink(destFile);
             }
             catch (e) {
                 // Try to override file permission
                 if (e.code === 'EPERM') {
-                    yield ioUtil.chmod(destFile, '0666');
-                    yield ioUtil.unlink(destFile);
+                    yield chmod(destFile, '0666');
+                    yield unlink(destFile);
                 }
                 // other errors = it doesn't exist, no work to do
             }
             // Copy over symlink
-            const symlinkFull = yield ioUtil.readlink(srcFile);
-            yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? 'junction' : null);
+            const symlinkFull = yield readlink(srcFile);
+            yield symlink(symlinkFull, destFile, IS_WINDOWS ? 'junction' : null);
         }
-        else if (!(yield ioUtil.exists(destFile)) || force) {
-            yield ioUtil.copyFile(srcFile, destFile);
+        else if (!(yield exists(destFile)) || force) {
+            yield copyFile(srcFile, destFile);
         }
     });
 }
@@ -34681,19 +34681,28 @@ function _unique(values) {
     return Array.from(new Set(values));
 }
 //# sourceMappingURL=tool-cache.js.map
-;// CONCATENATED MODULE: external "process"
-const external_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("process");
-;// CONCATENATED MODULE: ./src/index.js
+;// CONCATENATED MODULE: ./src/utils.js
+
+
+function getPlatformKey() {
+	switch (external_os_namespaceObject.platform()) {
+		case "win32":
+			return "windows";
+		case "darwin":
+			return "macos";
+		default:
+			return "linux";
+	}
+}
+
+;// CONCATENATED MODULE: ./src/tool.js
 
 
 
 
 
 
-
-
-
-const toolMap = {
+const tools = {
 	nvgtpm: {
 		windows: {
 			file: "nvgtpm.exe",
@@ -34722,14 +34731,14 @@ const toolMap = {
 	},
 };
 
-function parseTool(input) {
+function parse(input) {
 	const parts = input.split("@");
 	return {
 		name: parts[0],
 		tag: parts[1] || "latest",
 	};
 }
-function resolveToolUrl(url, tag) {
+function resolveUrl(url, tag) {
 	if (typeof url === "string") {
 		return url;
 	}
@@ -34745,27 +34754,17 @@ function resolveToolUrl(url, tag) {
 	throw new Error(`No URL available for tag "${tag}"`);
 }
 
-function getPlatformKey() {
-	switch (external_os_namespaceObject.platform()) {
-		case "win32":
-			return "windows";
-		case "darwin":
-			return "macos";
-		default:
-			return "linux";
-	}
-}
-async function src_downloadTool(url, destination) {
+async function download(url, destination) {
 	const tempFile = await downloadTool(url);
 	await mkdirP(external_path_namespaceObject.dirname(destination));
 	// Overwrite existing file
-	await exec_exec("cp", ["-R", tempFile, destination]);
+	await io_cp(tempFile, destination);
 	return destination;
 }
-async function installTool(toolInput, installDir) {
+async function install(toolInput, installDir) {
 	const platform = getPlatformKey();
-	const { name, tag } = parseTool(toolInput);
-	const definition = toolMap[name];
+	const { name, tag } = parse(toolInput);
+	const definition = tools[name];
 	if (!definition) {
 		throw new Error(`Unknown NVGT tool: ${name}`);
 	}
@@ -34773,16 +34772,30 @@ async function installTool(toolInput, installDir) {
 	if (!platformInfo) {
 		throw new Error(`Tool "${name}" is not supported on ${platform}`);
 	}
-	const url = resolveToolUrl(platformInfo.url, tag);
+	const url = resolveUrl(platformInfo.url, tag);
 	const destination = external_path_namespaceObject.join(installDir, platformInfo.file);
-	info(`Installing ${name}@${tag}`);
-	await src_downloadTool(url, destination);
+	core.info(`Installing ${name}@${tag}`);
+	await download(url, destination);
 	if (platform !== "windows") {
 		external_fs_namespaceObject.chmodSync(destination, 0o755);
 	}
-	info(`${name}@${tag} installed at ${destination}`);
+	core.info(`${name}@${tag} installed at ${destination}`);
 	return destination;
 }
+
+;// CONCATENATED MODULE: external "process"
+const external_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("process");
+;// CONCATENATED MODULE: ./src/index.js
+
+
+
+
+
+
+
+
+
+
 async function run() {
 	try {
 		const version = getInput("version");
@@ -34853,7 +34866,7 @@ async function run() {
 				if (external_fs_namespaceObject.existsSync(targetApp)) {
 					await rmRF(targetApp);
 				}
-				await exec_exec("cp", ["-R", `${mount}/NVGT.app`, appDir]);
+				await io_cp(`${mount}/NVGT.app`, appDir, {recursive: true});
 			} finally {
 				info("Unmounting NVGT DMG...");
 				await exec_exec("hdiutil", ["detach", mount, "-quiet"]);
@@ -34869,7 +34882,7 @@ async function run() {
 		if (tools.length > 0) {
 			info("Installing tools...");
 			for (const t of tools) {
-				await installTool(t, installPath);
+				await install(t, installPath);
 			}
 		}
 	} catch (err) {

@@ -2,101 +2,12 @@ import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
 import * as io from "@actions/io";
 import * as exec from "@actions/exec";
+import * as tool from "./tool.js";
 import os from "os";
 import path from "path";
 import fs from "fs";
 import process from "process";
 
-const toolMap = {
-	nvgtpm: {
-		windows: {
-			file: "nvgtpm.exe",
-			url: {
-				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm.exe",
-				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm.exe",
-				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm.exe",
-			},
-		},
-		linux: {
-			file: "nvgtpm",
-			url: {
-				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-linux",
-				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm-linux",
-				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-linux",
-			},
-		},
-		macos: {
-			file: "nvgtpm",
-			url: {
-				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-macos",
-				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm-macos",
-				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-macos",
-			},
-		},
-	},
-};
-
-function parseTool(input) {
-	const parts = input.split("@");
-	return {
-		name: parts[0],
-		tag: parts[1] || "latest",
-	};
-}
-function resolveToolUrl(url, tag) {
-	if (typeof url === "string") {
-		return url;
-	}
-	if (tag === "latest" && url.latest) {
-		return url.latest;
-	}
-	if (tag === "dev" && url.dev) {
-		return url.dev;
-	}
-	if (url.ver) {
-		return url.ver.replace("%0", tag);
-	}
-	throw new Error(`No URL available for tag "${tag}"`);
-}
-
-function getPlatformKey() {
-	switch (os.platform()) {
-		case "win32":
-			return "windows";
-		case "darwin":
-			return "macos";
-		default:
-			return "linux";
-	}
-}
-async function downloadTool(url, destination) {
-	const tempFile = await tc.downloadTool(url);
-	await io.mkdirP(path.dirname(destination));
-	// Overwrite existing file
-	await exec.exec("cp", ["-R", tempFile, destination]);
-	return destination;
-}
-async function installTool(toolInput, installDir) {
-	const platform = getPlatformKey();
-	const { name, tag } = parseTool(toolInput);
-	const definition = toolMap[name];
-	if (!definition) {
-		throw new Error(`Unknown NVGT tool: ${name}`);
-	}
-	const platformInfo = definition[platform];
-	if (!platformInfo) {
-		throw new Error(`Tool "${name}" is not supported on ${platform}`);
-	}
-	const url = resolveToolUrl(platformInfo.url, tag);
-	const destination = path.join(installDir, platformInfo.file);
-	core.info(`Installing ${name}@${tag}`);
-	await downloadTool(url, destination);
-	if (platform !== "windows") {
-		fs.chmodSync(destination, 0o755);
-	}
-	core.info(`${name}@${tag} installed at ${destination}`);
-	return destination;
-}
 async function run() {
 	try {
 		const version = core.getInput("version");
@@ -168,7 +79,7 @@ async function run() {
 				if (fs.existsSync(targetApp)) {
 					await io.rmRF(targetApp);
 				}
-				await exec.exec("cp", ["-R", `${mount}/NVGT.app`, appDir]);
+				await io.cp(`${mount}/NVGT.app`, appDir, {recursive: true});
 			} finally {
 				core.info("Unmounting NVGT DMG...");
 				await exec.exec("hdiutil", ["detach", mount, "-quiet"]);
@@ -184,7 +95,7 @@ async function run() {
 		if (tools.length > 0) {
 			core.info("Installing tools...");
 			for (const t of tools) {
-				await installTool(t, installPath);
+				await tool.install(t, installPath);
 			}
 		}
 	} catch (err) {
