@@ -18,9 +18,10 @@ jobs:
         uses: ./
         with:
           dev: true
-          tools: nvgtpm
+          tools: nvgtpm@dev
       - name: Checkout NVGT Outputs
         shell: bash
         run: |
           nvgt -V
+          nvgtpm program about
           ls "${{ steps.engine.outputs.path }}"

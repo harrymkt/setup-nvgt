@@ -90,7 +90,6 @@ async function installTool(toolInput, installDir) {
 	const url = resolveToolUrl(platformInfo.url, tag);
 	const destination = path.join(installDir, platformInfo.file);
 	core.info(`Installing ${name}@${tag}`);
-	core.info(`URL: ${url}`);
 	await downloadTool(url, destination);
 	if (platform !== "windows") {
 		fs.chmodSync(destination, 0o755);
@@ -196,7 +195,7 @@ async function run() {
 			core.info("Added to PATH");
 		}
 		core.info(`Installed at: ${installPath}`);
-		if (tools) {
+		if (tools.length() > 0) {
 			core.info("Installing tools");
 			for (const t of tools) {
 				await installTool(t, installPath);

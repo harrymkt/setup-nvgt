@@ -34776,7 +34776,6 @@ async function installTool(toolInput, installDir) {
 	const url = resolveToolUrl(platformInfo.url, tag);
 	const destination = external_path_namespaceObject.join(installDir, platformInfo.file);
 	info(`Installing ${name}@${tag}`);
-	info(`URL: ${url}`);
 	await src_downloadTool(url, destination);
 	if (platform !== "windows") {
 		external_fs_namespaceObject.chmodSync(destination, 0o755);
@@ -34881,7 +34880,7 @@ async function run() {
 			info("Added to PATH");
 		}
 		info(`Installed at: ${installPath}`);
-		if (tools) {
+		if (tools.length() > 0) {
 			info("Installing tools");
 			for (const t of tools) {
 				await installTool(t, installPath);
