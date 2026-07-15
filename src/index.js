@@ -6,12 +6,71 @@ import os from "os";
 import path from "path";
 import fs from "fs";
 import process from "process";
+
+const toolMap = {
+	nvgtpm: {
+		windows: {
+			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm.exe",
+			file: "nvgtpm.exe",
+		},
+		linux: {
+			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-linux",
+			file: "nvgtpm",
+		},
+		macos: {
+			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-macos",
+			file: "nvgtpm",
+		},
+	}
+};
+function getPlatformKey() {
+	switch (os.platform()) {
+		case "win32":
+			return "windows";
+		case "darwin":
+			return "macos";
+		default:
+			return "linux";
+	}
+}
+async function downloadTool(url, destination) {
+	const tempFile = await tc.downloadTool(url);
+	await io.mkdirP(path.dirname(destination));
+	// Overwrite existing file
+	await fs.copyFile(tempFile, destination);
+	return destination;
+}
+async function installTool(tool, installDir) {
+	const platform = getPlatformKey();
+	const definition = toolMap[tool];
+	if (!definition) {
+		throw new Error(`Unknown NVGT tool: ${tool}`);
+	}
+	const platformInfo = definition[platform];
+	if (!platformInfo) {
+		throw new Error(`Tool "${tool}" is not supported on ${platform}`);
+	}
+	const destination = path.join(installDir, platformInfo.file);
+	core.info(`Installing ${tool}`);
+	await downloadTool(platformInfo.url, destination);
+	// Linux/macOS binaries need execute permission
+	if (platform !== "windows") {
+		await exec.exec("chmod", ["755", destination]);
+	}
+	core.info(`${tool} installed at ${destination}`);
+	return destination;
+}
+
 async function run() {
 	try {
 		const version = core.getInput("version");
 		const latest = core.getInput("latest") === "true";
 		const dev = core.getInput("dev") === "true";
 		const addToPath = core.getInput("add-to-path") === "true";
+		const tools = core
+			.getMultilineInput("tools")
+			.map(tool => tool.trim())
+			.filter(Boolean);
 		const platform = os.platform();
 		let PLATFORM, EXT;
 		if (platform === "win32") {
@@ -100,6 +159,12 @@ async function run() {
 			core.info("Added to PATH");
 		}
 		core.info(`Installed at: ${installPath}`);
+		if (tools) {
+			core.info("Installing tools");
+			for (const t of tools) {
+				await installTool(t, installPath);
+			}
+		}
 	} catch (err) {
 		core.setFailed(err.message);
 	}

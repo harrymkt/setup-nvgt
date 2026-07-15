@@ -34692,12 +34692,70 @@ const external_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import
 
 
 
+
+const toolMap = {
+	nvgtpm: {
+		windows: {
+			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm.exe",
+			file: "nvgtpm.exe",
+		},
+		linux: {
+			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-linux",
+			file: "nvgtpm",
+		},
+		macos: {
+			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-macos",
+			file: "nvgtpm",
+		},
+	}
+};
+function getPlatformKey() {
+	switch (external_os_namespaceObject.platform()) {
+		case "win32":
+			return "windows";
+		case "darwin":
+			return "macos";
+		default:
+			return "linux";
+	}
+}
+async function src_downloadTool(url, destination) {
+	const tempFile = await downloadTool(url);
+	await mkdirP(external_path_namespaceObject.dirname(destination));
+	// Overwrite existing file
+	await external_fs_namespaceObject.copyFile(tempFile, destination);
+	return destination;
+}
+async function installTool(tool, installDir) {
+	const platform = getPlatformKey();
+	const definition = toolMap[tool];
+	if (!definition) {
+		throw new Error(`Unknown NVGT tool: ${tool}`);
+	}
+	const platformInfo = definition[platform];
+	if (!platformInfo) {
+		throw new Error(`Tool "${tool}" is not supported on ${platform}`);
+	}
+	const destination = external_path_namespaceObject.join(installDir, platformInfo.file);
+	info(`Installing ${tool}`);
+	await src_downloadTool(platformInfo.url, destination);
+	// Linux/macOS binaries need execute permission
+	if (platform !== "windows") {
+		await exec_exec("chmod", ["755", destination]);
+	}
+	info(`${tool} installed at ${destination}`);
+	return destination;
+}
+
 async function run() {
 	try {
 		const version = getInput("version");
 		const latest = getInput("latest") === "true";
 		const dev = getInput("dev") === "true";
 		const addToPath = getInput("add-to-path") === "true";
+		const tools = getMultilineInput("tools")
+			.map(tool => tool.trim())
+			.filter(Boolean);
 		const platform = external_os_namespaceObject.platform();
 		let PLATFORM, EXT;
 		if (platform === "win32") {
@@ -34786,8 +34844,15 @@ async function run() {
 			info("Added to PATH");
 		}
 		info(`Installed at: ${installPath}`);
+		if (tools) {
+			info("Installing tools");
+			for (const t of tools) {
+				await installTool(t, installPath);
+			}
+		}
 	} catch (err) {
 		setFailed(err.message);
 	}
 }
 run();
+
