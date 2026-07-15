@@ -195,7 +195,7 @@ async function run() {
 			core.info("Added to PATH");
 		}
 		core.info(`Installed at: ${installPath}`);
-		if (tools.length() > 0) {
+		if (tools.length > 0) {
 			core.info("Installing tools");
 			for (const t of tools) {
 				await installTool(t, installPath);

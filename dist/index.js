@@ -34880,7 +34880,7 @@ async function run() {
 			info("Added to PATH");
 		}
 		info(`Installed at: ${installPath}`);
-		if (tools.length() > 0) {
+		if (tools.length > 0) {
 			info("Installing tools");
 			for (const t of tools) {
 				await installTool(t, installPath);
