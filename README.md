@@ -13,16 +13,16 @@ name: Build NVGT
 on: push
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup NVGT
         id: nvgt
-        uses: harrymkt/setup-nvgt@main
+        uses: harrymkt/setup-nvgt@v1.0.7
         with:
           latest: true
       - name: Build
-        # Your own build here. Eg:
+        # Your own build here. i.e.
         run: nvgt -c your_script.nvgt
 ```
 
@@ -31,3 +31,11 @@ Provide variables with the `with` parameter:
 - `latest`(bool) optional: Should the action fetch the latest release as possible? Defaults to `true`.
 - `version`(string) optional: The NVGT version you want to install if not latest. Eg, `0.89.1_beta`. Defaults to none. This input will be ignored if either `latest` or `dev` is `true`.
 - `dev`(bool) optional: Toggles whether it should download latest development version.
+- `tools`(string) optional: A list of tools to install, see below. This can install multiple tools by separating them with lines.
+
+## Available tools
+The following is a list of tools available to install using `tools` input:
+
+| Name | Info |
+|---|---|
+| `nvgtpm` | The NVGT [package manager](https://github.com/harrymkt/nvgtpm), currently unofficial |

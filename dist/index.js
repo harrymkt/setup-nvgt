@@ -34696,19 +34696,55 @@ const external_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import
 const toolMap = {
 	nvgtpm: {
 		windows: {
-			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm.exe",
 			file: "nvgtpm.exe",
+			url: {
+				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm.exe",
+				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm.exe",
+				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm.exe",
+			},
 		},
 		linux: {
-			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-linux",
 			file: "nvgtpm",
+			url: {
+				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-linux",
+				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm-linux",
+				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-linux",
+			},
 		},
 		macos: {
-			url: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-macos",
 			file: "nvgtpm",
+			url: {
+				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-macos",
+				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm-macos",
+				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-macos",
+			},
 		},
-	}
+	},
 };
+
+function parseTool(input) {
+	const parts = input.split("@");
+	return {
+		name: parts[0],
+		tag: parts[1] || "latest",
+	};
+}
+function resolveToolUrl(url, tag) {
+	if (typeof url === "string") {
+		return url;
+	}
+	if (tag === "latest" && url.latest) {
+		return url.latest;
+	}
+	if (tag === "dev" && url.dev) {
+		return url.dev;
+	}
+	if (url.ver) {
+		return url.ver.replace("%0", tag);
+	}
+	throw new Error(`No URL available for tag "${tag}"`);
+}
+
 function getPlatformKey() {
 	switch (external_os_namespaceObject.platform()) {
 		case "win32":
@@ -34726,27 +34762,28 @@ async function src_downloadTool(url, destination) {
 	await exec_exec("cp", ["-R", tempFile, destination]);
 	return destination;
 }
-async function installTool(tool, installDir) {
+async function installTool(toolInput, installDir) {
 	const platform = getPlatformKey();
-	const definition = toolMap[tool];
+	const { name, tag } = parseTool(toolInput);
+	const definition = toolMap[name];
 	if (!definition) {
-		throw new Error(`Unknown NVGT tool: ${tool}`);
+		throw new Error(`Unknown NVGT tool: ${name}`);
 	}
 	const platformInfo = definition[platform];
 	if (!platformInfo) {
-		throw new Error(`Tool "${tool}" is not supported on ${platform}`);
+		throw new Error(`Tool "${name}" is not supported on ${platform}`);
 	}
+	const url = resolveToolUrl(platformInfo.url, tag);
 	const destination = external_path_namespaceObject.join(installDir, platformInfo.file);
-	info(`Installing ${tool}`);
-	await src_downloadTool(platformInfo.url, destination);
-	// Linux/macOS binaries need execute permission
+	info(`Installing ${name}@${tag}`);
+	info(`URL: ${url}`);
+	await src_downloadTool(url, destination);
 	if (platform !== "windows") {
-		await exec_exec("chmod", ["755", destination]);
+		external_fs_namespaceObject.chmodSync(destination, 0o755);
 	}
-	info(`${tool} installed at ${destination}`);
+	info(`${name}@${tag} installed at ${destination}`);
 	return destination;
 }
-
 async function run() {
 	try {
 		const version = getInput("version");

@@ -3,14 +3,21 @@ description: Download and install NVGT for the current platform.
 
 inputs:
   version:
+    description: The version to install. Ignored if latest or dev is true.
     required: false
     default: ""
   latest:
+    description: Install latest version. Ignored if dev is true.
     required: false
     default: "true"
   dev:
+    description: Install the development bleeding edge version. Takes president over all else.
     required: false
     default: "false"
+  tools:
+    description: A multiline separated list of tools to install, i.e. nvgtpm.
+    required: false
+    default: ""
   add-to-path:
     required: false
     default: "true"
