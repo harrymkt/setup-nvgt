@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v7
       - name: Setup NVGT
         id: nvgt
-        uses: harrymkt/setup-nvgt@v1.0.7
+        uses: harrymkt/setup-nvgt@v1.0.8
         with:
           latest: true
       - name: Build
@@ -39,6 +39,6 @@ Provide variables with the `with` parameter:
 ## Available tools
 The following is a list of tools available to install using `tools` input:
 
-| Name | Info |
+| Name | Description |
 |---|---|
 | `nvgtpm` | The NVGT [package manager](https://github.com/harrymkt/nvgtpm), currently unofficial |

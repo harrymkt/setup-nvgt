@@ -1,6 +1,6 @@
 {
   "name": "setup-nvgt",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "Download and install the NVGT scripting game engine",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

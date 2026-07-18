@@ -34710,24 +34710,24 @@ const tools = {
 			url: {
 				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm.exe",
 				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm.exe",
-				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm.exe",
-			},
+				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm.exe"
+			}
 		},
 		linux: {
 			file: "nvgtpm",
 			url: {
 				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-linux",
 				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm-linux",
-				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-linux",
-			},
+				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-linux"
+			}
 		},
 		macos: {
 			file: "nvgtpm",
 			url: {
 				latest: "https://github.com/harrymkt/nvgtpm/releases/latest/download/nvgtpm-macos",
 				dev: "https://github.com/harrymkt/nvgtpm/releases/download/dev/nvgtpm-macos",
-				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-macos",
-			},
+				ver: "https://github.com/harrymkt/nvgtpm/releases/download/%0/nvgtpm-macos"
+			}
 		},
 	},
 };
