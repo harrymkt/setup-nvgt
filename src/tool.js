@@ -70,10 +70,12 @@ export async function install(toolInput, installDir) {
 	const definition = tools[name];
 	if (!definition) {
 		throw new Error(`Unknown NVGT tool: ${name}`);
+		return false;
 	}
 	const platformInfo = definition[platform];
 	if (!platformInfo) {
 		throw new Error(`Tool "${name}" is not supported on ${platform}`);
+		return false;
 	}
 	const url = resolveUrl(platformInfo.url, tag);
 	const destination = path.join(installDir, platformInfo.file);
@@ -83,5 +85,5 @@ export async function install(toolInput, installDir) {
 		fs.chmodSync(destination, 0o755);
 	}
 	core.info(`${name}@${tag} installed at ${destination}`);
-	return destination;
+	return true;
 }

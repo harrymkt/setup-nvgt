@@ -13,7 +13,7 @@ async function run() {
 		const version = core.getInput("version");
 		const latest = core.getInput("latest") === "true";
 		const dev = core.getInput("dev") === "true";
-		const addToPath = core.getInput("add-to-path") === "true";
+		const addToPath = core.getInput("add_to_path") === "true";
 		const tools = core
 			.getMultilineInput("tools")
 			.map(tool => tool.trim())

@@ -34768,10 +34768,12 @@ async function install(toolInput, installDir) {
 	const definition = tools[name];
 	if (!definition) {
 		throw new Error(`Unknown NVGT tool: ${name}`);
+		return false;
 	}
 	const platformInfo = definition[platform];
 	if (!platformInfo) {
 		throw new Error(`Tool "${name}" is not supported on ${platform}`);
+		return false;
 	}
 	const url = resolveUrl(platformInfo.url, tag);
 	const destination = external_path_namespaceObject.join(installDir, platformInfo.file);
@@ -34781,7 +34783,7 @@ async function install(toolInput, installDir) {
 		external_fs_namespaceObject.chmodSync(destination, 0o755);
 	}
 	info(`${name}@${tag} installed at ${destination}`);
-	return destination;
+	return true;
 }
 
 ;// CONCATENATED MODULE: external "process"
@@ -34802,7 +34804,7 @@ async function run() {
 		const version = getInput("version");
 		const latest = getInput("latest") === "true";
 		const dev = getInput("dev") === "true";
-		const addToPath = getInput("add-to-path") === "true";
+		const addToPath = getInput("add_to_path") === "true";
 		const tools = getMultilineInput("tools")
 			.map(tool => tool.trim())
 			.filter(Boolean);

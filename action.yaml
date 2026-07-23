@@ -1,11 +1,10 @@
 name: Setup NVGT
-description: Download and install NVGT for the current platform.
+description: Download and install NVGT and tools for the current platform.
 
 inputs:
   version:
     description: Version to install. Ignored if latest or dev is true.
     required: false
-    default: ""
   latest:
     description: Install the latest version. Ignored if dev is true.
     required: false
@@ -15,11 +14,10 @@ inputs:
     required: false
     default: "false"
   tools:
-    description: A multiline separated list of tools to install, i.e. nvgtpm.
+    description: A newline separated list of tools to install, i.e. nvgtpm.
     required: false
-    default: ""
-  add-to-path:
-    description: Add NVGT to path after installation.
+  add_to_path:
+    description: Add NVGT to path directory after installation.
     required: false
     default: "true"
 

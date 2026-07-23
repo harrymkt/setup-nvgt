@@ -1,6 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto eol=lf
-*.js
-*.yaml
-*.json
-.editorconfig
+*.js linguist-detectable
+*.yaml linguist-detectable
+*.json linguist-detectable
+.editorconfig linguist-detectable
